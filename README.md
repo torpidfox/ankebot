@@ -31,8 +31,10 @@ uv sync
 
 #### Using pip (Alternative)
 
+If you prefer using pip, you can install from `pyproject.toml`:
+
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
 ### 2. Get API Keys
@@ -224,8 +226,7 @@ Replace `YOUR_USERNAME` with your GitHub username and `ankebot` with your reposi
 
 This project uses `uv` for dependency management with `pyproject.toml`:
 
-- `pyproject.toml` - Project metadata and dependencies
-- `requirements.txt` - Still available for pip users (generated from pyproject.toml)
+- `pyproject.toml` - Project metadata and dependencies (PEP 621 standard)
 
 To add a new dependency:
 ```bash
@@ -238,7 +239,7 @@ uv pip install package-name
 This project uses [Dependabot](https://github.com/dependabot) to automatically keep dependencies up to date.
 
 **Configured Ecosystems:**
-- **Python (pip)** - Monitors `pyproject.toml` and `requirements.txt`
+- **Python (pip)** - Monitors `pyproject.toml`
 - **Docker** - Monitors base image updates in `Dockerfile`
 - **GitHub Actions** - Monitors action versions in `.github/workflows/`
 

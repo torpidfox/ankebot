@@ -9,8 +9,8 @@ WORKDIR /app
 # Copy dependency files
 COPY pyproject.toml ./
 
-# Install dependencies using uv
-RUN uv pip install --system --no-cache python-telegram-bot==20.7 google-generativeai==0.3.2 genanki==0.13.1 python-dotenv==1.0.0 "pydantic>=2.0.0"
+# Install dependencies using uv from pyproject.toml
+RUN uv pip install --system --no-cache -e .
 
 # Copy application code
 COPY bot.py ./
