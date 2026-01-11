@@ -233,6 +233,28 @@ uv pip install package-name
 # Then update pyproject.toml manually
 ```
 
+### Dependabot
+
+This project uses [Dependabot](https://github.com/dependabot) to automatically keep dependencies up to date.
+
+**Configured Ecosystems:**
+- **Python (pip)** - Monitors `pyproject.toml` and `requirements.txt`
+- **Docker** - Monitors base image updates in `Dockerfile`
+- **GitHub Actions** - Monitors action versions in `.github/workflows/`
+
+**Update Schedule:**
+- Weekly on Mondays at 09:00 UTC
+- Pull requests are automatically created for available updates
+- Minor and patch updates are grouped together for Python dependencies
+
+Dependabot will:
+- Create pull requests for dependency updates
+- Label PRs with `dependencies` and the ecosystem name
+- Group minor and patch updates to reduce PR noise
+- Limit open PRs to prevent overwhelming the repository
+
+To review or adjust Dependabot settings, see `.github/dependabot.yml`.
+
 ## Notes
 
 - Cards are stored in memory during the bot session
