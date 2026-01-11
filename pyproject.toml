@@ -5,7 +5,7 @@ description = "Telegram bot for learning German words with Anki flashcards"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    "python-telegram-bot==20.7",
+    "python-telegram-bot==22.5",
     "google-generativeai==0.3.2",
     "genanki==0.13.1",
     "python-dotenv==1.0.0",
