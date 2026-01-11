@@ -6,17 +6,14 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 # Set working directory
 WORKDIR /app
 
-# Copy dependency files
-COPY pyproject.toml ./
+# Copy dependency files and application code
+COPY pyproject.toml bot.py README.md ./
 
-# Install dependencies using uv from pyproject.toml
-RUN uv pip install --system --no-cache -e .
-
-# Copy application code
-COPY bot.py ./
+# Sync dependencies using uv (creates .venv and installs all dependencies)
+RUN uv sync
 
 # Set environment variables (can be overridden)
 ENV PYTHONUNBUFFERED=1
 
-# Run the bot
-CMD ["python", "bot.py"]
+# Run the bot using uv (automatically uses the synced environment)
+CMD ["uv", "run", "python", "bot.py"]
