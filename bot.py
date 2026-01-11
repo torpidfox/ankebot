@@ -1,8 +1,10 @@
 import os
+import json
 import logging
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from pydantic import BaseModel
 import google.generativeai as genai
 import genanki
 
@@ -35,6 +37,14 @@ if ALLOWED_USER_IDS_STR:
 
 # Initialize Gemini
 genai.configure(api_key=GEMINI_API_KEY)
+
+
+# Pydantic model for structured output
+class ExampleResponse(BaseModel):
+    """Response model for example sentence and translation."""
+    example_sentence: str
+    translation: str
+
 
 # Global Anki deck - stores cards in memory
 anki_deck_id = 2059400110  # Random ID for the deck
@@ -141,21 +151,30 @@ async def generate_example(update: Update, context: ContextTypes.DEFAULT_TYPE):
             action='typing'
         )
         
-        # Generate example sentence and translation using Gemini
+        # Generate example sentence and translation using Gemini with structured output
         model = genai.GenerativeModel('gemini-3-flash-preview')
+        
+        # Get JSON schema from Pydantic model
+        response_schema = ExampleResponse.model_json_schema()
+        
         prompt = f"""Erstelle einen Beispielsatz auf Deutsch mit dem Wort "{german_word}". 
 Der Satz sollte natürlich und alltäglich sein. 
-Antworte NUR mit dem Beispielsatz auf Deutsch, ohne zusätzliche Erklärungen."""
+Dann übersetze diesen Satz ins Englische."""
         
-        response = model.generate_content(prompt)
-        example_sentence = response.text.strip()
+        # Generate content with structured output
+        response = model.generate_content(
+            prompt,
+            generation_config={
+                "response_mime_type": "application/json",
+                "response_schema": response_schema
+            }
+        )
         
-        # Generate translation
-        translation_prompt = f"""Übersetze den folgenden deutschen Satz ins Englische: "{example_sentence}"
-Antworte NUR mit der englischen Übersetzung, ohne zusätzliche Erklärungen."""
-        
-        translation_response = model.generate_content(translation_prompt)
-        translation = translation_response.text.strip()
+        # Parse JSON response using Pydantic model
+        response_json = json.loads(response.text)
+        example_data = ExampleResponse(**response_json)
+        example_sentence = example_data.example_sentence
+        translation = example_data.translation
         
         # Create Anki note (this will generate 2 cards: direct and reversed)
         note = genanki.Note(
