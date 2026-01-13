@@ -4,8 +4,9 @@ import logging
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-from pydantic import BaseModel
-import google.generativeai as genai
+from pydantic import BaseModel, Field
+from google import genai
+from google.genai.types import GenerateContentConfig
 import genanki
 
 # Load environment variables
@@ -36,14 +37,13 @@ if ALLOWED_USER_IDS_STR:
         ALLOWED_USER_IDS = set()
 
 # Initialize Gemini
-genai.configure(api_key=GEMINI_API_KEY)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 
-# Pydantic model for structured output
 class ExampleResponse(BaseModel):
     """Response model for example sentence and translation."""
-    example_sentence: str
-    translation: str
+    example_sentence: str = Field(description="A natural and everyday example sentence in German")
+    translation: str = Field(description="The translation of the example sentence into English")
 
 
 # Global Anki deck - stores cards in memory
@@ -151,23 +151,19 @@ async def generate_example(update: Update, context: ContextTypes.DEFAULT_TYPE):
             action='typing'
         )
         
-        # Generate example sentence and translation using Gemini with structured output
-        model = genai.GenerativeModel('gemini-3-flash-preview')
-        
-        # Get JSON schema from Pydantic model
-        response_schema = ExampleResponse.model_json_schema()
-        
+        # Generate example sentence and translation using Gemini with structured output        
         prompt = f"""Erstelle einen Beispielsatz auf Deutsch mit dem Wort "{german_word}". 
 Der Satz sollte natürlich und alltäglich sein. 
 Dann übersetze diesen Satz ins Englische."""
-        
-        # Generate content with structured output
-        response = model.generate_content(
-            prompt,
-            generation_config={
-                "response_mime_type": "application/json",
-                "response_schema": response_schema
-            }
+
+
+           response = client.models.generate_content(
+            model="gemini-3-flash-preview",
+            contents=prompt,
+            config=GenerateContentConfig(
+                response_mime_type= "application/json",
+                response_schema= ExampleResponse,
+            ),
         )
         
         # Parse JSON response using Pydantic model
