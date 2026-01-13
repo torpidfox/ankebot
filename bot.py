@@ -157,7 +157,7 @@ Der Satz sollte natürlich und alltäglich sein.
 Dann übersetze diesen Satz ins Englische."""
 
 
-           response = client.models.generate_content(
+        response = client.models.generate_content(
             model="gemini-3-flash-preview",
             contents=prompt,
             config=GenerateContentConfig(
